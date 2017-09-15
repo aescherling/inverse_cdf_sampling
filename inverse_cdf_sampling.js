@@ -1,3 +1,7 @@
+// to do: dynamically update histogram scales
+// after that, allow changes in # of points, parameter, speed
+// after that, add different distributions. that'll probably take the most work.
+
 // svg properties
 var svgWidth = 500;
 var svgHeight = 500;
@@ -9,7 +13,7 @@ d3.select('#vis').append('svg')
 
 var svg = d3.select('svg');
 
-// svg outline
+// svg outline, mostly just for development purposes
 svg.append('rect')
   .attr('x', 0)
   .attr('y', 0)
@@ -32,14 +36,6 @@ var yHistMargin = {top: graphMargin.top, right: 50, bottom: graphMargin.bottom, 
     yHist = svg.append("g")
         .attr("transform", "translate(" + yHistMargin.left + "," + yHistMargin.top + ")");
 
-//yHist.append('rect')
-//  .attr('x', 0)
-//  .attr('y', 0)
-//  .attr('width', yHistWidth)
-//  .attr('height', yHistHeight)
-//  .attr('fill', 'white')
-//  .attr('stroke', 'lightgray');
-
 // histogram on the x axis
 var xHistMargin = {top: graphMargin.top + graphHeight + 50,
                    right: graphMargin.right, bottom: 30, left: graphMargin.left},
@@ -47,14 +43,6 @@ var xHistMargin = {top: graphMargin.top + graphHeight + 50,
     xHistHeight = svgHeight - xHistMargin.top - xHistMargin.bottom,
     xHist = svg.append("g")
         .attr("transform", "translate(" + xHistMargin.left + "," + xHistMargin.top + ")");
-
-//xHist.append('rect')
-//  .attr('x', 0)
-//  .attr('y', 0)
-//  .attr('width', xHistWidth)
-//  .attr('height', xHistHeight)
-//  .attr('fill', 'white')
-//  .attr('stroke', 'lightgray');
 
 // CDF of the exponential distribution
 // later add other distributions? Let user choose parameters?
@@ -206,7 +194,7 @@ yHist.selectAll('.yBar')
   .attr('fill', 'steelblue')
   .attr('stroke', d3.rgb('steelblue').darker());
 
-// draw axes
+// draw axes of y axis histogram
 scale = d3.scaleLinear().domain([0,1]).range([yHistWidth, 0]);
 yHist.append('g')
   .attr('class', 'axis xAxis')
@@ -233,7 +221,7 @@ xHist.selectAll('.xBar')
   .attr('fill', 'steelblue')
   .attr('stroke', d3.rgb('steelblue').darker());
 
-// draw axes
+// draw axes of x axis histogram
 scale = d3.scaleLinear().domain([0,1]).range([xHistHeight, 0]);
 xHist.append('g')
   .attr('class', 'axis yAxis')
