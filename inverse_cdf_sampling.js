@@ -143,8 +143,8 @@ xHist.append('g')
 
 function runSimulation(data) {
   // get the speed from the input bar
-  speed = +document.getElementById('speed').value 
-
+  speed = +document.getElementById('speed').value; 
+  tt = 1000 / speed;
 
   // function for calculating the counts necessary for producing a histogram
   // input: data, lower end of lowest bin, high end of highest bin, desired # of bins
