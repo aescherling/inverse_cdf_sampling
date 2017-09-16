@@ -5,16 +5,20 @@
 <!--
 <script type="text/javascript" async src="path-to-MathJax/MathJax.js?config=TeX-MML-AM_CHTML"></script>
 -->
-<!--
+
 <script type="text/javascript" async
   src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.2/MathJax.js?config=TeX-MML-AM_CHTML">
 </script>
--->
+
 <title>Inverse CDF sampling</title>
 </head>
 <body>
 <h1>Inverse CDF sampling</h1>
-<p>Sampling 50 points from the exponential distribution with parameter \(\lambda=3\).</p>
+Sampling from the exponential distribution with parameter \(\lambda=3\).<br>
+Sample size: <input type="text" id="sample_size" value="50"><br>
+Speed (samples per second): <input type="text" id="speed" value="3"><br>
+<div id="runSim" style="width: 110px">Run simulation</div>
+
 <p></p>
 <div id="vis"></div>
 <script src="inverse_cdf_sampling.js"></script>
