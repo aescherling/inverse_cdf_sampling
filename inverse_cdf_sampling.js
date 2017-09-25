@@ -51,13 +51,13 @@ d3.select('#vis').append('svg')
 var svg = d3.select('svg');
 
 // svg outline, mostly just for development purposes
-svg.append('rect')
-  .attr('x', 0)
-  .attr('y', 0)
-  .attr('width', svgWidth)
-  .attr('height', svgHeight)
-  .attr('fill', 'white')
-  .attr('stroke', 'black');
+//svg.append('rect')
+//  .attr('x', 0)
+//  .attr('y', 0)
+//  .attr('width', svgWidth)
+//  .attr('height', svgHeight)
+//  .attr('fill', 'white')
+//  .attr('stroke', 'black');
 
 // graph properties
 var graphMargin = {top: 30, right: 30, bottom: 200, left: 200},
@@ -106,6 +106,53 @@ xHist.append('g')
   .attr('transform', 'translate(0,' + xHistHeight + ')')
   .call(d3.axisBottom(scale).ticks(0));
 
+/* Plot preliminary CDF */
+
+// get the parameter from the input bar
+var lambda = +document.getElementById('parameter').value;
+
+// generate points for plotting the CDF itself
+graphMax = inverseExponentialCDF(0.999, lambda);
+var graphX = makeRange(graphMax, 1e2);
+var graphY = graphX.map(function (xx) {return exponentialCDF(xx, lambda);});
+var graphData = graphX.map(function(value, index){
+  return {x: value, y: graphY[index]}
+});
+
+// scales for the main plot
+xScale = d3.scaleLinear().domain([0, graphMax]).range([0,graphWidth]).nice();
+yScale = d3.scaleLinear().domain([0,1]).range([graphHeight, 0]);
+
+// remove axes and line if they already exist
+graph.selectAll('.axis').remove();
+graph.selectAll('.line').remove();
+
+// axes
+graph.append('g')
+  .attr('class', 'axis xAxis')
+  .attr('transform', 'translate(0,' + graphHeight + ')')
+  .call(d3.axisBottom(xScale).ticks(5));
+
+graph.append('g')
+  .attr('class', 'axis yAxis')
+  .call(d3.axisLeft(yScale).ticks(5));
+
+// function for making the line
+var makeLine = d3.line()
+    .x(function(d) { return xScale(d.x); })
+    .y(function(d) { return yScale(d.y); });
+
+// bind the data
+var line = graph.selectAll('.line')
+  .data([graphData])
+  .enter().append('g')
+  .attr('class', 'line');
+
+// make the line
+line.append('path')
+  .attr('class', 'line')
+  .attr('d', function (d) {return makeLine(graphData);});
+
 
 /* 
 Function that runs the simulation, given data and a parameter.
@@ -117,7 +164,7 @@ function runSimulation(data, parameter) {
   var lambda = parameter;
 
   // generate points for plotting the CDF itself
-  graphMax = inverseExponentialCDF(0.9999, lambda);
+  graphMax = inverseExponentialCDF(0.999, lambda);
   var graphX = makeRange(graphMax, 1e2);
   var graphY = graphX.map(function (xx) {return exponentialCDF(xx, lambda);});
   var graphData = graphX.map(function(value, index){

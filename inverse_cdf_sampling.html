@@ -1,6 +1,7 @@
 <html>
 <head>
-<link rel="stylesheet" href="inverse_cdf_sampling.css">
+<link rel="stylesheet" href="css/bootstrap.min.css">
+<link rel="stylesheet" href="css/inverse_cdf_sampling.css">
 <script src="lib/d3.min.js"></script>
 <!--
 <script type="text/javascript" async src="path-to-MathJax/MathJax.js?config=TeX-MML-AM_CHTML"></script>
@@ -13,28 +14,68 @@
 <title>Inverse CDF sampling</title>
 </head>
 <body>
-<h2>Inverse CDF sampling</h2>
-<p>The ability to draw samples from probability distributions is very important in the field of statistics and other related fields. A few applications come to mind:</p>
-<ul>
-	<li>Random samples can be used in surveying or in experiments to decide who to call for a survey, or to decide which subjects should get treatment.</li>
-	<li>Samples can be used in a process called bootstrapping to estimate the standard errors of a model.</li>
-	<li>Samples can be used to test how a model might perform on different kinds of data.</li>
-	<li>Samples can also be used to estimate complex models using Monte Carlo techniques.</li>
-	<li>Samples also provide a simple and interesting way of examining statistical distributions, which may be of interest to beginners and experts alike.</li>
-</ul>
-<p>Right now, I'm mostly just focused on the last application - random samples provide a way of playing with distributions, which can help us learn about them. Unfortunately, in practice generating random samples from a given distribution may not be that simple. One might argue that it's impossible - rather than random numbers, we rely on "pseudorandom" numbers, generated using deterministic algorithms that are not random at all, but appear to be just random enough to do the job. (If you started drawing samples of astronomical size you might start to get repeats.)</p>
-<p>Statistical software packages such as R or python (e.g., the numpy package) provide functions for generating pseudorandom numbers from a wide variety of common distributions. However, some programming languages are not so generous. If you're using Javascript, for example, you might have a bit of a harder time figuring out how to generate a random number from the distribution of your choice.</p>
-<p>In any case, the curious observer might wonder how these random (well, pseudorandom) numbers are generated for all these different distributions. Unfortunately, the best answer is simply, "it's complicated." In practice, different methods are used for different distributions. The methods have been optimized for these specific distributions.</p>
-<p>However, there are a few general-purpose methods that can be used for generating (pseudo)random numbers from just about any distribution. One such method is known as the inversion method. It's an easy to understand and generally applicable method, which is still sometimes used in practice. R, for example, uses inversion for generating random samples from the Cauchy and Weibull distributions, and in special cases of some other distributions as well.</p>
 
-Sampling from the exponential distribution:<br>
-Parameter: \(\lambda=\)<input type="text" id="parameter" value="3"><br>
-Sample size: <input type="text" id="sample_size" value="30"><br>
-Speed (samples per second): <input type="text" id="speed" value="2"><br>
-<div id="runSim" style="width: 110px">Run simulation</div>
+<div class="container">
+	<div style="height:50px"></div>
+	<div class="row">
+		<div class="col-md-2"></div>
+		<div class="col-md-8">
+			<h2>Inverse CDF sampling (inversion method)</h2>
+			<!--
+			<p>The ability to draw samples from probability distributions is very important in the field of statistics and other related fields. A few applications come to mind:</p>
+			<ul>
+				<li>Random samples can be used in conducting surveys or experiments, to decide who to call for a survey or which subjects should get treatment.</li>
+				<li>Samples can be used in a process called bootstrapping to estimate the standard errors of a model.</li>
+				<li>Samples can be used to test how a model might perform on different kinds of data.</li>
+				<li>Samples can also be used to estimate complex models using Monte Carlo techniques.</li>
+				<li>Samples also provide a simple and interesting way of examining statistical distributions, which may be of interest to beginners and experts alike.</li>
+			</ul>
+			<p>Unfortunately, in practice generating random samples from a given distribution may not be that simple. One might argue that it's impossible - rather than random numbers, we rely on "pseudorandom" numbers, generated using deterministic algorithms. In fact they are not random at all, but they appear to be random enough that they do the job. (If you started drawing samples of astronomical size your sample might start to repeat itself.)</p>
+			<p>Statistical software packages such as R or python (e.g., the numpy package) provide functions for generating pseudorandom numbers from a wide variety of common distributions. However, some programming languages are not so generous. If you're using Javascript, for example, you might have a bit of a harder time figuring out how to generate a random number from the distribution of your choice.</p>
+			<p>In any case, the curious observer might wonder how these random (well, pseudorandom) numbers are generated for all these different distributions. Unfortunately, the best answer is simply, "it's complicated." In practice, different methods are used for different distributions. The methods have been optimized for these specific distributions.</p>
+			<p>However, there are a few general-purpose methods that can be used for generating (pseudo)random numbers from just about any distribution. One such method is known as the inversion method. It's an easy to understand and generally applicable method which is sometimes still used in practice. R, for example, uses inversion for generating random samples from the Cauchy and Weibull distributions, and in special cases of some other distributions as well.</p>
+			-->
+			<p>The inversion method leverages the CDF of the (continuous) distribution you want to sample from in order to transform a pseudrorandom sample from the uniform (0,1) distribution to a sample from the desired distribution.</p>
+			<p>To understand how this works, first suppose that \(f(x)\) is some (continuous) density function of interest, \(F(x)\) is the corresponding CDF, \(X \sim f(x)\), and \(Y=F(X)\). Note that \(Y \in (0,1)\); each possible value of \(Y\) is a probability. Furthermore, the CDF of \(Y\) is </p>
+			<p>
+				\begin{align}
+				P(Y \le y) & = P(F(X) \le y) \\
+				&= P(X \le F^{-1}(y)) \\
+				& = F(F^{-1}(y)) \\
+				& = y.	
+				\end{align}
+			</p>
+			<p>That is, if you transform a random variable by applying the CDF, you get a uniform distribution. The inversion method for sampling uses the same process in the opposite direction. Taking a uniformly (0,1) variable and applying the inverse CDF, we get the desired distribution. In particular, let \(U \sim unif (0,1) \), let \(f(x)\) and \(F(x)\) be the PDF and CDF for a desired distribution, and let \(Y=F^{-1}(U)\). It follows that:</p>
+			<p>
+				\begin{align}
+				P(Y \le y) & = P(F^{-1}(U) \le y) \\
+				& = P(U \le F(y)) \\
+				& = F(y).
+				\end{align}
+			</p>
+			<p>Hence, \(Y\) is distributed following the desired distribution.</p>
+			<p>The following visualization shows an example of this, drawing samples from a uniform distribution (placed on the y-axis) and translating them to samples from an exponential distribution (on the x-axis) by passing them through the exponential CDF.</p>
+		</div>
+	</div>
 
-<p></p>
-<div id="vis"></div>
+	<div class="row">
+		<div class="col-md-2"></div>
+		<div class="col-md-8">
+			<h4>Sampling from the exponential distribution</h4>
+			PDF: \(f(x)=\lambda e^{- \lambda x}\) &emsp; &emsp;
+			CDF: \(F(x)=1 - e^{- \lambda x}\)<br>
+			Parameter: \(\lambda=\)<input type="text" id="parameter" value="1" style="width:40px"><br>
+			Sample size: <input type="text" id="sample_size" value="40" style="width:40px"><br>
+			Speed (samples per second): <input type="text" id="speed" value="4" style="width:40px"><br>
+			<div id="runSim" style="width: 110px; text-decoration: underline; color: steelblue">Run simulation</div>
+			<div id="vis"></div>
+		</div>
+	</div>
+</div>
+
+
+
+
 <script src="inverse_cdf_sampling.js"></script>
 </body>
 </html>
