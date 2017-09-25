@@ -3,20 +3,19 @@
 // another idea: add pause/resume buttons. http://xaedes.de/dev/transitions/
 
 /* simluation parameters */
-var sampleSize = 50,
-    speed = 10,
-    tt = 1000 / speed,
-    lambda = 3;
+//var sampleSize = 50,
+//    speed = 10,
+//    tt = 1000 / speed,
+//    lambda = 3;
 
-
-/* Make the graphs: empty histograms and the CDF */
+/* Some necessary functions */
 
 // CDF of the exponential distribution
 // later add other distributions? Let user choose parameters?
-var exponentialCDF = function(x) {
+var exponentialCDF = function(x, lambda) {
   return 1 - Math.exp(-1 * lambda * x);
 }
-var inverseExponentialCDF = function (x) {
+var inverseExponentialCDF = function (x, lambda) {
   return -1 * Math.log(1 - x) / lambda;
 }
 
@@ -26,6 +25,19 @@ function randomArray(length) {
         return Math.random();
     });
 }
+
+// generate points for plotting CDF
+var makeRange = function(max, n) {
+  out = [0];
+  for (var i=1; i < (n + 1); i++) {
+    out.push(max * i / n);
+  }
+  return out;
+}
+
+
+
+/* Make the graphs: empty histograms and the CDF plot axes */
 
 // svg properties
 var svgWidth = 500;
@@ -69,52 +81,6 @@ var xHistMargin = {top: graphMargin.top + graphHeight + 50,
     xHist = svg.append("g")
         .attr("transform", "translate(" + xHistMargin.left + "," + xHistMargin.top + ")");
 
-// generate points for plotting CDF
-var makeRange = function(max, n) {
-  out = [0];
-  for (var i=1; i < (n + 1); i++) {
-    out.push(max * i / n);
-  }
-  return out;
-}
-
-graphMax = inverseExponentialCDF(0.9999);
-var graphX = makeRange(graphMax, 1e2);
-var graphY = graphX.map(exponentialCDF);
-var graphData = graphX.map(function(value, index){
-  return {x: value, y: graphY[index]}
-});
-
-// scales
-xScale = d3.scaleLinear().domain([0, graphMax]).range([0,graphWidth]).nice();
-yScale = d3.scaleLinear().domain([0,1]).range([graphHeight, 0]);
-
-// axes
-graph.append('g')
-	.attr('class', 'axis xAxis')
-	.attr('transform', 'translate(0,' + graphHeight + ')')
-	.call(d3.axisBottom(xScale).ticks(5));
-
-graph.append('g')
-	.attr('class', 'axis yAxis')
-	.call(d3.axisLeft(yScale).ticks(5));
-
-// function for making the line
-var makeLine = d3.line()
-    .x(function(d) { return xScale(d.x); })
-    .y(function(d) { return yScale(d.y); });
-
-// bind the data
-var line = graph.selectAll('.line')
-  .data([graphData])
-  .enter().append('g')
-  .attr('class', 'line');
-
-// make the line
-line.append('path')
-  .attr('class', 'line')
-  .attr('d', function (d) {return makeLine(graphData);});
-
 // draw axes of y axis histogram
 scale = d3.scaleLinear().domain([0,1]).range([yHistWidth, 0]);
 yHist.append('g')
@@ -141,7 +107,57 @@ xHist.append('g')
   .call(d3.axisBottom(scale).ticks(0));
 
 
-function runSimulation(data) {
+/* 
+Function that runs the simulation, given data and a parameter.
+Plots the CDF, then runs an animation to show all the data points on the graph
+while updating the two histograms.
+*/
+function runSimulation(data, parameter) {
+
+  var lambda = parameter;
+
+  // generate points for plotting the CDF itself
+  graphMax = inverseExponentialCDF(0.9999, lambda);
+  var graphX = makeRange(graphMax, 1e2);
+  var graphY = graphX.map(function (xx) {return exponentialCDF(xx, lambda);});
+  var graphData = graphX.map(function(value, index){
+    return {x: value, y: graphY[index]}
+  });
+
+  // scales for the main plot
+  xScale = d3.scaleLinear().domain([0, graphMax]).range([0,graphWidth]).nice();
+  yScale = d3.scaleLinear().domain([0,1]).range([graphHeight, 0]);
+
+  // remove axes and line if they already exist
+  graph.selectAll('.axis').remove();
+  graph.selectAll('.line').remove();
+
+  // axes
+  graph.append('g')
+    .attr('class', 'axis xAxis')
+    .attr('transform', 'translate(0,' + graphHeight + ')')
+    .call(d3.axisBottom(xScale).ticks(5));
+
+  graph.append('g')
+    .attr('class', 'axis yAxis')
+    .call(d3.axisLeft(yScale).ticks(5));
+
+  // function for making the line
+  var makeLine = d3.line()
+      .x(function(d) { return xScale(d.x); })
+      .y(function(d) { return yScale(d.y); });
+
+  // bind the data
+  var line = graph.selectAll('.line')
+    .data([graphData])
+    .enter().append('g')
+    .attr('class', 'line');
+
+  // make the line
+  line.append('path')
+    .attr('class', 'line')
+    .attr('d', function (d) {return makeLine(graphData);});
+
   // get the speed from the input bar
   speed = +document.getElementById('speed').value; 
   tt = 1000 / speed;
@@ -376,10 +392,12 @@ function runSimulation(data) {
 /* Data */
 // generate random uniform numbers and convert to exponential dist using inverse CDF
 function generateData() {
+  // get the parameter from the input bar
+  parameter = +document.getElementById('parameter').value;
   // get the sample size from the input bar
   sampleSize = +document.getElementById('sample_size').value;
   y = randomArray(sampleSize);
-  x = y.map(inverseExponentialCDF);
+  x = y.map(function (xx) {return inverseExponentialCDF(xx, parameter);});
   data = x.map(function(value, index) {
     return {x: value, y: y[index]}
   });
@@ -399,7 +417,9 @@ d3.select('#runSim')
     d3.selectAll('.hline').remove();
     d3.selectAll('.vline').remove();
     myData = generateData();
-    runSimulation(myData);
+    // get the parameter from the input bar
+    parameter = +document.getElementById('parameter').value;
+    runSimulation(myData, parameter);
 })
 
 

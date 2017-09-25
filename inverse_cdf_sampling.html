@@ -13,8 +13,22 @@
 <title>Inverse CDF sampling</title>
 </head>
 <body>
-<h1>Inverse CDF sampling</h1>
-Sampling from the exponential distribution with parameter \(\lambda=3\).<br>
+<h2>Inverse CDF sampling</h2>
+<p>The ability to draw samples from probability distributions is very important in the field of statistics and other related fields. A few applications come to mind:</p>
+<ul>
+	<li>Random samples can be used in surveying or in experiments to decide who to call for a survey, or to decide which subjects should get treatment.</li>
+	<li>Samples can be used in a process called bootstrapping to estimate the standard errors of a model.</li>
+	<li>Samples can be used to test how a model might perform on different kinds of data.</li>
+	<li>Samples can also be used to estimate complex models using Monte Carlo techniques.</li>
+	<li>Samples also provide a simple and interesting way of examining statistical distributions, which may be of interest to beginners and experts alike.</li>
+</ul>
+<p>Right now, I'm mostly just focused on the last application - random samples provide a way of playing with distributions, which can help us learn about them. Unfortunately, in practice generating random samples from a given distribution may not be that simple. One might argue that it's impossible - rather than random numbers, we rely on "pseudorandom" numbers, generated using deterministic algorithms that are not random at all, but appear to be just random enough to do the job. (If you started drawing samples of astronomical size you might start to get repeats.)</p>
+<p>Statistical software packages such as R or python (e.g., the numpy package) provide functions for generating pseudorandom numbers from a wide variety of common distributions. However, some programming languages are not so generous. If you're using Javascript, for example, you might have a bit of a harder time figuring out how to generate a random number from the distribution of your choice.</p>
+<p>In any case, the curious observer might wonder how these random (well, pseudorandom) numbers are generated for all these different distributions. Unfortunately, the best answer is simply, "it's complicated." In practice, different methods are used for different distributions. The methods have been optimized for these specific distributions.</p>
+<p>However, there are a few general-purpose methods that can be used for generating (pseudo)random numbers from just about any distribution. One such method is known as the inversion method. It's an easy to understand and generally applicable method, which is still sometimes used in practice. R, for example, uses inversion for generating random samples from the Cauchy and Weibull distributions, and in special cases of some other distributions as well.</p>
+
+Sampling from the exponential distribution:<br>
+Parameter: \(\lambda=\)<input type="text" id="parameter" value="3"><br>
 Sample size: <input type="text" id="sample_size" value="30"><br>
 Speed (samples per second): <input type="text" id="speed" value="2"><br>
 <div id="runSim" style="width: 110px">Run simulation</div>
