@@ -485,10 +485,3 @@ d3.select('#runSim')
 })
 
 
-// redraw the CDF if the user changes lambda
-//d3.select('#parameter').attr('onblur', "drawCDF();");
-//$(document).ready(
-//  d3.select('#parameter').attr('onblur', "alert('yo');");
-//}
-
-
