@@ -107,6 +107,19 @@ xHist.append('g')
   .call(d3.axisBottom(scale).ticks(0));
 
 /* Plot preliminary CDF */
+// function called when parameter input box is entered.
+// record the value so the graph is only redrawn if the value changes.
+var parameter = +document.getElementById('parameter').value;
+function storeParameter() {
+  parameter = +document.getElementById('parameter').value;
+}
+
+function redrawCDF() {
+  var lambda = +document.getElementById('parameter').value;
+  if (lambda!=parameter) {
+    drawCDF();
+  }
+}
 
 function drawCDF() {
   // remove axes, line, points, and histogram bars if they already exist
